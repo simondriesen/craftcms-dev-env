@@ -52,4 +52,5 @@ EXPOSE 80
 COPY startup.sh startup.sh
 
 # Run startup.sh on container startup
+RUN chmod +x ./startup.sh
 CMD ["./startup.sh"]
