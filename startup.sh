@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# Creating executable file to create database.
+tfile='mktemp'
+cat << EOF > $tfile
+  USE mysql;
+  CREATE DATABASE craftcms;
+EOF
+
 # Create a databank for craftcms
 if ! grep -qs '/dev/sda1 /www' /proc/mounts; then
   # Volume is mounted.
@@ -26,12 +33,24 @@ if ! grep -qs '/dev/sda1 /www' /proc/mounts; then
     exit $status
   fi
 
+  # Create a databank for craftcms
+  ./usr/bin/mysqld --user=mysql --bootstrap --silent-startup < $tfile
+  rm -f $tfile
+
+  # Start mysql
+  ./usr/bin/mysqld --user=mysql --silent-startup
+  status=$?
+  if [ $status -ne 0 ]; then
+    echo "Failed to start mysql: $status"
+    exit $status
+  fi
+
 else
   # Volume isn't mounted.
   echo "Mount the volume /www to get started! If you mount this volume to an empty folder the latest Craft CMS version will be downloaded there automatically."
 fi
 
-# Keeping script running
+# Make sure script keeps running
 while true
 do
     sleep 60
